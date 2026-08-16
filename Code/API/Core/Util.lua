@@ -485,7 +485,12 @@ do -- General helpers
 end
 
 do -- Cvars
-    function addon.API.Util:SetCVar(cvar, value) if not InCombatLockdown() and GetCVar(cvar) ~= value then SetCVar(cvar, value) end end
+    -- GetCVar() always returns a string, so comparing it against a numeric `value`
+    -- with `~=` was always true (different Lua types never compare equal) and this
+    -- guard never actually skipped a redundant SetCVar call. Compare as strings so
+    -- callers that poll/update a CVar every frame (e.g. Cinematic_Script.lua's
+    -- OnUpdate offset smoothing) don't re-issue SetCVar when nothing changed.
+    function addon.API.Util:SetCVar(cvar, value) if not InCombatLockdown() and GetCVar(cvar) ~= tostring(value) then SetCVar(cvar, value) end end
 end
 
 do -- Inline icons

@@ -150,7 +150,11 @@ function NS.Script:Load()
 			do -- Focus
 
 				function NS.Script:StartFocus(strength, limitX, limitY)
-					SetCVar("test_cameraTargetFocusInteractEnable", 1)
+					-- Routed through the Util wrapper (skips no-op writes, respects
+					-- InCombatLockdown) instead of a raw SetCVar on this experimental
+					-- ("test_") camera CVar. See CancelFocus() and the OnUpdate offset
+					-- loop below for the same fix.
+					addon.API.Util:SetCVar("test_cameraTargetFocusInteractEnable", 1)
 
 					NS.Variables.Saved_FocusInteractStrengthPitch = GetCVar("test_cameraTargetFocusInteractStrengthPitch")
 					NS.Variables.Saved_FocusInteractionStrengthYaw = GetCVar("test_cameraTargetFocusEnemyStrengthYaw")
@@ -159,7 +163,7 @@ function NS.Script:Load()
 				end
 
 				function NS.Script:CancelFocus()
-					SetCVar("test_cameraTargetFocusInteractEnable", addon.ConsoleVariables.Variables.Saved_cameraTargetFocusInteractEnable)
+					addon.API.Util:SetCVar("test_cameraTargetFocusInteractEnable", addon.ConsoleVariables.Variables.Saved_cameraTargetFocusInteractEnable)
 					NS.Util:StopFocusInteractStrength()
 				end
 			end
@@ -598,7 +602,27 @@ function NS.Script:Load()
 					if NS.Variables.IsHorizontalMode or addon.Database.VAR_CINEMATIC_ACTIONCAM_OFFSET then
 						if not NS.Variables.IsTransition then
 							local newStrength = current + (target - current) * speed
-							SetCVar("test_cameraOverShoulder", newStrength)
+
+							-- This runs every single frame while the cinematic camera is
+							-- active. The eased interpolation above asymptotically
+							-- approaches `target` and keeps producing a (tiny) new value
+							-- forever, so an unconditional SetCVar here rewrote this
+							-- experimental ("test_") CVar dozens of times per second.
+							-- On the current client that write path can trigger a broken
+							-- confirmation dialog (Blizzard_StaticPopup: "Dialog
+							-- EXPERIMENTAL_CVAR_WARNING does not exist"), spamming BugGrabber
+							-- and adding real per-frame overhead. Only write once the
+							-- change is large enough to matter (imperceptible below this
+							-- threshold anyway), and snap to the target once close enough
+							-- so the loop stops writing entirely instead of writing
+							-- ever-smaller deltas indefinitely.
+							if math.abs(newStrength - target) < 0.001 then
+								newStrength = target
+							end
+
+							if math.abs(newStrength - current) > 0.001 then
+								addon.API.Util:SetCVar("test_cameraOverShoulder", newStrength)
+							end
 						end
 					end
 				end
