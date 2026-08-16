@@ -485,7 +485,41 @@ do -- General helpers
 end
 
 do -- Cvars
-    function addon.API.Util:SetCVar(cvar, value) if not InCombatLockdown() and GetCVar(cvar) ~= value then SetCVar(cvar, value) end end
+    -- GetCVar() always returns a string, so comparing it against a numeric `value`
+    -- with `~=` was always true (different Lua types never compare equal) and this
+    -- guard never actually skipped a redundant SetCVar call. Compare as strings so
+    -- callers that poll/update a CVar every frame (e.g. Cinematic_Script.lua's
+    -- OnUpdate offset smoothing) don't re-issue SetCVar when nothing changed.
+    function addon.API.Util:SetCVar(cvar, value) if not InCombatLockdown() and GetCVar(cvar) ~= tostring(value) then SetCVar(cvar, value) end end
+end
+
+do -- Experimental (test_) Cvars
+    -- Blizzard's `test_`-prefixed CVars (test_cameraOverShoulder,
+    -- test_cameraTargetFocusInteractEnable/StrengthPitch/StrengthYaw, ...) are
+    -- flagged as "experimental". Writing one now routes through
+    -- HandleExperimentalCVarConfirmationNeeded (Blizzard_Game/Shared/
+    -- EventImplementation.lua), which tries to show a StaticPopup
+    -- ("EXPERIMENTAL_CVAR_WARNING") that isn't registered on this client, throwing
+    -- "Dialog EXPERIMENTAL_CVAR_WARNING does not exist" on every single write.
+    --
+    -- This addon already tries to suppress that via
+    -- UIParent:UnregisterEvent("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED") in
+    -- Cinematic/Load.lua, but that no longer has any effect on the current client -
+    -- this event is now dispatched through Blizzard's newer EventRouting/
+    -- EventImplementation system rather than a plain per-frame RegisterEvent/
+    -- OnEvent, so it can't be silenced from addon code that way anymore.
+    --
+    -- Until Blizzard fixes the missing dialog (or this addon stops depending on
+    -- `test_` CVars), disable these writes outright instead of repeatedly hitting
+    -- the broken confirmation flow. This means the Action Camera "Offset" and
+    -- "Focus" effects during NPC interactions will no longer move the camera -
+    -- flip DISABLE_EXPERIMENTAL_CVARS back to false once Blizzard fixes this.
+    local DISABLE_EXPERIMENTAL_CVARS = true
+
+    function addon.API.Util:SetExperimentalCVar(cvar, value)
+        if DISABLE_EXPERIMENTAL_CVARS then return end
+        addon.API.Util:SetCVar(cvar, value)
+    end
 end
 
 do -- Inline icons
