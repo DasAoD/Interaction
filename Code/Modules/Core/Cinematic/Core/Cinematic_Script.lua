@@ -154,7 +154,7 @@ function NS.Script:Load()
 					-- InCombatLockdown) instead of a raw SetCVar on this experimental
 					-- ("test_") camera CVar. See CancelFocus() and the OnUpdate offset
 					-- loop below for the same fix.
-					addon.API.Util:SetCVar("test_cameraTargetFocusInteractEnable", 1)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractEnable", 1)
 
 					NS.Variables.Saved_FocusInteractStrengthPitch = GetCVar("test_cameraTargetFocusInteractStrengthPitch")
 					NS.Variables.Saved_FocusInteractionStrengthYaw = GetCVar("test_cameraTargetFocusEnemyStrengthYaw")
@@ -163,7 +163,7 @@ function NS.Script:Load()
 				end
 
 				function NS.Script:CancelFocus()
-					addon.API.Util:SetCVar("test_cameraTargetFocusInteractEnable", addon.ConsoleVariables.Variables.Saved_cameraTargetFocusInteractEnable)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractEnable", addon.ConsoleVariables.Variables.Saved_cameraTargetFocusInteractEnable)
 					NS.Util:StopFocusInteractStrength()
 				end
 			end
@@ -621,7 +621,7 @@ function NS.Script:Load()
 							end
 
 							if math.abs(newStrength - current) > 0.001 then
-								addon.API.Util:SetCVar("test_cameraOverShoulder", newStrength)
+								addon.API.Util:SetExperimentalCVar("test_cameraOverShoulder", newStrength)
 							end
 						end
 					end

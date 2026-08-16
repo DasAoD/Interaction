@@ -175,14 +175,14 @@ function NS.Util:Load()
 				end
 
 				if Current >= duration then
-					SetCVar("test_cameraOverShoulder", level)
+					addon.API.Util:SetExperimentalCVar("test_cameraOverShoulder", level)
 
 					InteractionFrame.INT_ShoulderOffset:SetScript("OnUpdate", nil)
 
 					return
 				end
 
-				SetCVar("test_cameraOverShoulder", Offset)
+				addon.API.Util:SetExperimentalCVar("test_cameraOverShoulder", Offset)
 			end)
 		end
 
@@ -202,7 +202,7 @@ function NS.Util:Load()
 			if InteractionFrame.INT_ShoulderOffset then
 				InteractionFrame.INT_ShoulderOffset:SetScript("OnUpdate", nil)
 
-				SetCVar("test_cameraOverShoulder", NS.Variables.Saved_ShoulderOffset)
+				addon.API.Util:SetExperimentalCVar("test_cameraOverShoulder", NS.Variables.Saved_ShoulderOffset)
 			end
 		end
 	end
@@ -222,34 +222,34 @@ function NS.Util:Load()
 
 				if Current >= duration then
 					if limitX and not limitY then
-						SetCVar("test_cameraTargetFocusInteractStrengthYaw", 0)
+						addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthYaw", 0)
 					end
 					if not limitX and limitY then
-						SetCVar("test_cameraTargetFocusInteractStrengthPitch", 0)
+						addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthPitch", 0)
 					end
 
 					if limitX or limitX == nil then
-						SetCVar("test_cameraTargetFocusInteractStrengthPitch", level)
+						addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthPitch", level)
 					end
 					if limitY or limitY == nil then
-						SetCVar("test_cameraTargetFocusInteractStrengthYaw", level)
+						addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthYaw", level)
 					end
 
 					InteractionFrame.INT_FocusInteract:SetScript("OnUpdate", nil)
 				end
 
 				if limitX and not limitY then
-					SetCVar("test_cameraTargetFocusInteractStrengthYaw", 0)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthYaw", 0)
 				end
 				if not limitX and limitY then
-					SetCVar("test_cameraTargetFocusInteractStrengthPitch", 0)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthPitch", 0)
 				end
 
 				if limitX or limitX == nil then
-					SetCVar("test_cameraTargetFocusInteractStrengthPitch", Offset)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthPitch", Offset)
 				end
 				if limitY or limitY == nil then
-					SetCVar("test_cameraTargetFocusInteractStrengthYaw", Offset)
+					addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthYaw", Offset)
 				end
 			end)
 		end
@@ -257,8 +257,8 @@ function NS.Util:Load()
 		function NS.Util:StopFocusInteractStrength()
 			if InteractionFrame.INT_FocusInteract then
 				InteractionFrame.INT_FocusInteract:SetScript("OnUpdate", nil)
-				SetCVar("test_cameraTargetFocusInteractStrengthPitch", addon.ConsoleVariables.Variables.Saved_CameraTargetFocusInteractStrengthPitch)
-				SetCVar("test_cameraTargetFocusInteractStrengthYaw", addon.ConsoleVariables.Variables.Saved_CameraTargetFocusInteractStrengthYaw)
+				addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthPitch", addon.ConsoleVariables.Variables.Saved_CameraTargetFocusInteractStrengthPitch)
+				addon.API.Util:SetExperimentalCVar("test_cameraTargetFocusInteractStrengthYaw", addon.ConsoleVariables.Variables.Saved_CameraTargetFocusInteractStrengthYaw)
 			end
 		end
 	end
